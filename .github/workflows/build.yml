@@ -22,7 +22,7 @@ jobs:
       - name: Extrair o projeto da app
         run: |
           mkdir -p VIPUssd
-          unzip -o vipussd-app-v19.zip -d VIPUssd
+          unzip -o vipussd-app-v17.zip -d VIPUssd
 
       - name: Compilar o APK
         working-directory: VIPUssd
@@ -31,16 +31,14 @@ jobs:
           set -o pipefail
           gradle assembleDebug --no-daemon 2>&1 | tee build.log
 
-      - name: Guardar o log do erro
+      - name: Mostrar erros (sempre)
         if: always()
         working-directory: VIPUssd
-        run: cp build.log ../build-log.txt || true
-
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: build-log
-          path: build-log.txt
+        run: |
+          echo "=== LINHAS COM ERRO ==="
+          grep -E "error:|FAILED|What went wrong|Could not|not found" -A4 build.log | head -150 || true
+          echo "=== ÚLTIMAS 60 LINHAS ==="
+          tail -60 build.log || true
 
       - uses: actions/upload-artifact@v4
         with:
